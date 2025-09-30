@@ -9,11 +9,22 @@
 </head>
 <body>
   
-  
+  <div id="video">
 
+    <video class="player" id="user-1" autoplay playsinline></video>
+    <video class="player" id="user-2" autoplay playsinline></video>
+    
+    <div class="controls">
+      <button id="end">End</button>
+    </div>
+    
+  </div>
 
-
-
+  <div id="info">
+    <h3>Create / Join a room </h3>
+    <input type="text" id="room" placeholder="Enter room name">
+    <button onclick="join()">Join</button> 
+  </div>
 
 
 
