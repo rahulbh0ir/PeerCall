@@ -1,34 +1,74 @@
+const socket = new WebSocket("ws://localhost:3000");
 
-let local;
+const stun = {
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" }
+  ]
+};
 
 
-let video = document.getElementById("video");
-let info = document.getElementById("info");
+let local = null;
+let localStream;
 
 let localVideo = document.getElementById("user-1");
 let remoteVideo = document.getElementById("user-2");
+let room = null;
 
 
+function send(type, payload) {
+  console.log("Sending to ", type, room, payload);
+  socket.send(JSON.stringify({type, room, payload}))
+}
 
 
-async function join() {
+async function join() {  
   
-  let room = document.getElementById("room").value.trim();
-  console.log(room);
+  room = document.getElementById("room").value.trim();
   
   if(!room) {
     alert("Please enter a room name");
     return;
   }
 
-  // video.style.display = "block"
-  // info.style.display = "none"
+  // document.querySelector("#video").style.display = "block";
+  // document.querySelector("#info").style.display = "none";
   
+  send("join", room)
 
-  let stream = await navigator.mediaDevices.getUserMedia({video: true, audio: false});
-  localVideo.srcObject = stream;
+  localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: false});
+  localVideo.srcObject = localStream;
   
+  await createPeerConnection();
+
+  let offer = await local.createOffer()
+  await local.setLocalDescription(offer)
+  console.log(offer)
+  send("offer", local.setLocalDescription) 
+
+}
 
 
+
+
+
+async function createPeerConnection() {
+  
+  if(local) return;
+
+  local = new RTCPeerConnection(stun); 
+  
+  local.onicecandidate = (event) => {
+    if(event.candidate) {
+      send("ice-canditate", event.candidate)
+    }
+  }
+
+  local.ontrack = (event) => {
+    console.log("Track- ", event)
+    remoteVideo.srcObject = event.streams[0];
+  }
+
+
+  localStream.getTracks().forEach(track => local.addTrack(track, localStream));
 
 }
