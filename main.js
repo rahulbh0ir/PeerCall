@@ -15,8 +15,19 @@ let remoteVideo = document.getElementById("user-2");
 let room = null;
 
 
+socket.onmessage = async (event) => {
+  let data = JSON.parse(event.data)  
+ 
+  if(data.type === "welcome") {
+  console.log("Welcome, Your ID - ", data.id);
+  }
+
+  
+}
+
+
+
 function send(type, payload) {
-  console.log("Sending to ", type, room, payload);
   socket.send(JSON.stringify({type, room, payload}))
 }
 
@@ -33,7 +44,7 @@ async function join() {
   // document.querySelector("#video").style.display = "block";
   // document.querySelector("#info").style.display = "none";
   
-  send("join", room)
+  socket.send(JSON.stringify({type:"join", room}))
 
   localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: false});
   localVideo.srcObject = localStream;
@@ -43,7 +54,7 @@ async function join() {
   let offer = await local.createOffer()
   await local.setLocalDescription(offer)
   console.log(offer)
-  send("offer", local.setLocalDescription) 
+  // send("offer", local.setLocalDescription) 
 
 }
 
@@ -59,7 +70,7 @@ async function createPeerConnection() {
   
   local.onicecandidate = (event) => {
     if(event.candidate) {
-      send("ice-canditate", event.candidate)
+      // send("ice-canditate", event.candidate)
     }
   }
 
