@@ -19,11 +19,37 @@ socket.onmessage = async (event) => {
   let data = JSON.parse(event.data)  
  
   if(data.type === "welcome") {
-  console.log("Welcome, Your ID - ", data.id);
+    console.log("Welcome, Your ID - ", data.id);
   }
 
+  if(data.type === "offer") {
+    
+    console.log("Type : - ", data.type);
+    console.log("Payload : - ", data.payload);
+    
+    await createPeerConnection();
+    await local.setRemoteDescription(new RTCSessionDescription(data.payload));
+    let answer = await local.createAnswer();
+    local.setLocalDescription(answer);
+    send("answer", answer)
+  }
   
+  if(data.type === "answer") {
+    console.log("Type : - ", data.type);
+    console.log("Payload : - ", data.payload);
+    await local.setRemoteDescription(new RTCSessionDescription(data.payload));
+  }
+
+  if(data.type === "ice-candidate") {
+    console.log("Type : - ", data.type);
+    console.log("Payload : - ", data.payload);
+    if(data.payload) {
+      await local.addIceCandidate(new RTCIceCandidate(data.payload));
+    }
+  }
+
 }
+
 
 
 
@@ -53,8 +79,8 @@ async function join() {
 
   let offer = await local.createOffer()
   await local.setLocalDescription(offer)
-  console.log(offer)
-  // send("offer", local.setLocalDescription) 
+  // console.log(offer)
+  send("offer", offer) 
 
 }
 
@@ -70,12 +96,11 @@ async function createPeerConnection() {
   
   local.onicecandidate = (event) => {
     if(event.candidate) {
-      // send("ice-canditate", event.candidate)
+      send("ice-candidate", event.candidate)
     }
   }
 
   local.ontrack = (event) => {
-    console.log("Track- ", event)
     remoteVideo.srcObject = event.streams[0];
   }
 

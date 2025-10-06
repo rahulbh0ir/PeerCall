@@ -6,8 +6,14 @@ let clients = new Map();
 let rooms = new Map();
 
 
-function broadcast() {
-
+function broadcast(room, senderId, message) {
+   const members = rooms.get(room) || new Set();
+   
+   members.forEach(id => {
+    if(id !== senderId && clients.has(id)) {
+      clients.get(id).send(JSON.stringify({...message, from: senderId}))
+    }   
+   })
 }
 
 
@@ -33,20 +39,21 @@ wss.on("connection", (ws) => {
 
     const { type, room, payload } = data
 
+
     if(type === "join") {
-
       joinedRoom = room;
+      
       if(!rooms.has(room)) rooms.set(room, new Set());
-
       rooms.get(room).add(id);
-
+      
       console.log("Room List: ", rooms)
+
     }
     
 
-
-
-
+    if(["offer", "answer", "ice-candidate"].includes(type) && joinedRoom) {
+      broadcast(joinedRoom, id, {type, payload})
+    }
 
 
   })
@@ -63,7 +70,8 @@ wss.on("connection", (ws) => {
       }
     }
     
-    console.log("Room List: ", rooms)
+    console.log("Rooms: ", rooms)
+
   })
 
 
