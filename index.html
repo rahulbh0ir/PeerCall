@@ -15,20 +15,22 @@
     <video class="player" id="user-2" autoplay playsinline></video>
     
     <div class="controls">
-      <button id="end">End</button>
+      <img id="video" src="./icons/video.png" />
+      <img id="mic" src="./icons/mic.png" />
+      <img id="hangup" src="./icons/hangup.png" />
+      <img id="chat" src="./icons/chat.png" />
     </div>
     
   </div>
 
   <div id="info">
     <h3>Create / Join a room </h3>
-    <input type="text" id="room" placeholder="Enter room name" autocomplete="off" autofocus/>
+    <input type="text" id="name" placeholder="Your Name" autocomplete="off" autofocus/>
+    <input type="text" id="room" placeholder="Enter room name" autocomplete="off"/>
     <button onclick="join()">Join</button> 
   </div>
 
-
-
-
+  <div id="notify"></div>
   
 </body>
 
